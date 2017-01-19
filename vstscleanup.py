@@ -46,13 +46,14 @@ def process_arguments():
 
     return arguments
 
-def _delete_build(headers, build_url):
+def _delete_build(headers, build_url, dry_run):
     """
     Deletes the VSTS build using the provided URL
     """
     logging.info('Delete "%s"', build_url)
-    delete_response = requests.delete(build_url + '?api-version=1.0', headers=headers)
-    delete_response.raise_for_status()
+    if not dry_run:
+        delete_response = requests.delete(build_url + '?api-version=1.0', headers=headers)
+        delete_response.raise_for_status()
 
 def _get_build_url(account_name, project_name, build_def_id, build_status):
     """
@@ -91,6 +92,5 @@ if __name__ == '__main__':
     logging.info('Found "%s" builds with status "%s"', all_builds['count'], args.build_status)
     for build in all_builds['value']:
         build_url = build['url']
-        if not args.dry_run:
-            _delete_build(headers, build_url)
+        _delete_build(headers, build_url, args.dry_run)
     logging.info('Done!')
